@@ -16,8 +16,24 @@ exec { 'apt-upgrade':
 }
 
 # install nodejs
-exec { 'install nodejs': command => 'apt-get install -y nodejs', require => Exec['apt-upgrade'], }
+exec { 'install-nodejs': command => 'apt-get install -y nodejs', require => Exec['apt-upgrade'], }
+
 # install cordova
-exec { 'install cordova': command => 'npm install -g cordova', require => Exec['install nodejs'], }
+exec { 'install-cordova': command => 'npm install -g cordova', require => Exec['install-nodejs'], }
+
+# install java
+exec { 'install-java': command => 'apt-get install -y openjdk-7-jdk', }
+
+# download Android SDK
+exec { 'download-android-sdk': 
+	command => 'wget http://dl.google.com/android/android-sdk_r23.0.2-linux.tgz',
+	onlyif => "test ! -f android-sdk_r23.0.2-linux.tgz",
+	path => ['/usr/bin','/usr/sbin','/bin','/sbin'],
+ }
 # install Android SDK
-exec { 'instal android sdk': command => 'wget http://dl.google.com/android/android-sdk_r23.0.2-linux.tgz || tar xzvf android-sdk_r23.0.2-linux.tgz', }
+exec { 'install-android-sdk':
+	command => 'tar xzvf android-sdk_r23.0.2-linux.tgz',
+	user => 'vagrant',
+	require => Exec['download-android-sdk'],
+	path => ['/usr/bin','/usr/sbin','/bin','/sbin'],
+}
